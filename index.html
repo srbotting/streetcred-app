@@ -3,47 +3,1468 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title><!-- Page Title --></title>
-  <meta name="description" content="" />
+  <title>StreetCred — Rate NZ Drivers &amp; Parkers by Licence Plate</title>
+  <meta name="description" content="StreetCred lets New Zealanders rate drivers and parkers by licence plate. Look up any plate to see their road reputation or rate a driver you saw today." />
   <meta name="robots" content="index, follow" />
-  <link rel="canonical" href="" />
+  <link rel="canonical" href="https://streetcred.nz/" />
 
   <!-- Open Graph -->
   <meta property="og:type" content="website" />
-  <meta property="og:url" content="" />
-  <meta property="og:title" content="" />
-  <meta property="og:description" content="" />
-  <meta property="og:image" content="https://placehold.co/1200x630" />
+  <meta property="og:url" content="https://streetcred.nz/" />
+  <meta property="og:title" content="StreetCred — Rate NZ Drivers & Parkers" />
+  <meta property="og:description" content="Look up any NZ licence plate to see their driving reputation, or rate a driver you encountered today." />
+  <meta property="og:image" content="https://placehold.co/1200x630/0D5F73/FFFFFF?text=StreetCred" />
 
   <!-- JSON-LD -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
-    "@type": "WebPage",
-    "name": "",
-    "url": "",
-    "description": ""
+    "@type": "WebApplication",
+    "name": "StreetCred",
+    "url": "https://streetcred.nz/",
+    "description": "Rate NZ drivers and parkers by licence plate number",
+    "applicationCategory": "UtilityApplication",
+    "operatingSystem": "Web"
   }
   </script>
 
   <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50:  '#EBF7FA',
+              100: '#C7EBF2',
+              200: '#8FD4E5',
+              300: '#4FBAD6',
+              400: '#1E9EBF',
+              500: '#0D5F73',
+              600: '#094F61',
+              700: '#07404F',
+              800: '#05313D',
+              900: '#03222A',
+            },
+          },
+          fontFamily: {
+            display: ['Syne', 'sans-serif'],
+            body: ['DM Sans', 'sans-serif'],
+          },
+        },
+      },
+    };
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&display=swap" rel="stylesheet" />
+
   <style>
-    /* Add custom styles here */
+    *, *::before, *::after { box-sizing: border-box; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: #F4F8FA;
+      color: #0D1F2D;
+      line-height: 1.7;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    h1, h2, h3, .font-display { font-family: 'Syne', sans-serif; }
+
+    /* ── Noise texture overlay ── */
+    .noise::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      background-size: 200px 200px;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    /* ── Cards ── */
+    .card {
+      background: #fff;
+      border-radius: 16px;
+      box-shadow:
+        0 1px 2px rgba(13,95,115,0.04),
+        0 4px 12px rgba(13,95,115,0.07),
+        0 12px 32px rgba(13,95,115,0.05);
+    }
+    .card-elevated {
+      box-shadow:
+        0 2px 4px rgba(13,95,115,0.06),
+        0 8px 24px rgba(13,95,115,0.12),
+        0 20px 48px rgba(13,95,115,0.08);
+    }
+
+    /* ── Buttons ── */
+    .btn-primary {
+      background: #0D5F73;
+      color: #fff;
+      border-radius: 10px;
+      padding: 12px 24px;
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 600;
+      font-size: 0.95rem;
+      cursor: pointer;
+      border: none;
+      box-shadow: 0 2px 4px rgba(13,95,115,0.25), 0 6px 16px rgba(13,95,115,0.18);
+      transition: transform 180ms cubic-bezier(0.34,1.56,0.64,1), box-shadow 180ms ease, background 180ms ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .btn-primary:hover {
+      background: #094F61;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(13,95,115,0.3), 0 10px 28px rgba(13,95,115,0.22);
+    }
+    .btn-primary:active {
+      transform: translateY(0) scale(0.98);
+      box-shadow: 0 1px 3px rgba(13,95,115,0.2);
+    }
+    .btn-primary:focus-visible {
+      outline: 3px solid #4FBAD6;
+      outline-offset: 2px;
+    }
+    .btn-primary:disabled {
+      background: #9BBFC8;
+      box-shadow: none;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .btn-secondary {
+      background: transparent;
+      color: #0D5F73;
+      border: 2px solid #0D5F73;
+      border-radius: 10px;
+      padding: 10px 22px;
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 600;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: transform 180ms cubic-bezier(0.34,1.56,0.64,1), background 180ms ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .btn-secondary:hover {
+      background: #EBF7FA;
+      transform: translateY(-1px);
+    }
+    .btn-secondary:active { transform: translateY(0) scale(0.98); }
+    .btn-secondary:focus-visible { outline: 3px solid #4FBAD6; outline-offset: 2px; }
+
+    .btn-danger {
+      background: #B91C1C;
+      color: #fff;
+      border-radius: 10px;
+      padding: 10px 22px;
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      border: none;
+      transition: transform 180ms cubic-bezier(0.34,1.56,0.64,1), background 180ms ease;
+    }
+    .btn-danger:hover { background: #991B1B; transform: translateY(-1px); }
+    .btn-danger:active { transform: translateY(0) scale(0.98); }
+    .btn-danger:focus-visible { outline: 3px solid #FCA5A5; outline-offset: 2px; }
+
+    /* ── Inputs ── */
+    .input {
+      width: 100%;
+      padding: 12px 16px;
+      border: 2px solid #DDE6EB;
+      border-radius: 10px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 1rem;
+      color: #0D1F2D;
+      background: #fff;
+      transition: border-color 160ms ease, box-shadow 160ms ease;
+      outline: none;
+    }
+    .input:hover { border-color: #9BBFC8; }
+    .input:focus { border-color: #0D5F73; box-shadow: 0 0 0 3px rgba(13,95,115,0.12); }
+    .input::placeholder { color: #8BAAB5; }
+
+    .label {
+      display: block;
+      font-weight: 600;
+      font-size: 0.875rem;
+      color: #0D1F2D;
+      margin-bottom: 6px;
+      letter-spacing: 0.01em;
+    }
+
+    /* ── Star rating ── */
+    .star-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 4px;
+      font-size: 2rem;
+      line-height: 1;
+      transition: transform 200ms cubic-bezier(0.34,1.56,0.64,1), opacity 160ms ease;
+      color: #D1E5EA;
+    }
+    .star-btn:hover, .star-btn.active { color: #D97706; transform: scale(1.2); }
+    .star-btn:focus-visible { outline: 2px solid #4FBAD6; border-radius: 4px; }
+
+    /* ── Event tag chips ── */
+    .tag-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 14px;
+      border: 2px solid #DDE6EB;
+      border-radius: 999px;
+      font-size: 0.875rem;
+      font-weight: 500;
+      cursor: pointer;
+      background: #fff;
+      color: #4A6674;
+      transition: border-color 140ms ease, background 140ms ease, transform 140ms ease, color 140ms ease;
+      user-select: none;
+    }
+    .tag-chip:hover { border-color: #0D5F73; color: #0D5F73; background: #EBF7FA; }
+    .tag-chip:focus-visible { outline: 3px solid #4FBAD6; outline-offset: 2px; }
+    .tag-chip.selected-neg { border-color: #B91C1C; background: #FEF2F2; color: #B91C1C; }
+    .tag-chip.selected-pos { border-color: #0E7A3D; background: #DCFCE7; color: #0E7A3D; }
+
+    /* ── Plate badge ── */
+    .plate {
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      background: #FEFCE8;
+      border: 3px solid #D97706;
+      border-radius: 8px;
+      padding: 6px 16px;
+      font-size: 1.5rem;
+      color: #1C1917;
+      display: inline-block;
+    }
+    .plate-lg {
+      font-size: 2.25rem;
+      padding: 10px 24px;
+    }
+
+    /* ── Star display ── */
+    .stars-display { color: #D97706; letter-spacing: 0.05em; }
+    .stars-display .empty { color: #DDE6EB; }
+
+    /* ── Verified badge ── */
+    .badge-verified {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: #DCFCE7;
+      color: #0E7A3D;
+      border-radius: 999px;
+      padding: 3px 10px;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+    .badge-registered {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: #DBEAFE;
+      color: #1D4ED8;
+      border-radius: 999px;
+      padding: 3px 10px;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+
+    /* ── Views / page transitions ── */
+    .view { display: none; opacity: 0; }
+    .view.active {
+      display: block;
+      animation: fadeUp 260ms cubic-bezier(0.22,1,0.36,1) forwards;
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── Step indicator ── */
+    .step-dot {
+      width: 10px; height: 10px;
+      border-radius: 999px;
+      background: #DDE6EB;
+      transition: background 240ms ease, transform 240ms ease, width 240ms ease;
+    }
+    .step-dot.active { background: #0D5F73; width: 28px; }
+    .step-dot.done   { background: #0E7A3D; }
+
+    /* ── Hero gradient ── */
+    .hero-bg {
+      background:
+        radial-gradient(ellipse 80% 60% at 20% 10%, rgba(13,95,115,0.85) 0%, transparent 70%),
+        radial-gradient(ellipse 60% 80% at 85% 90%, rgba(7,64,79,0.9) 0%, transparent 70%),
+        radial-gradient(ellipse 40% 50% at 60% 40%, rgba(79,186,214,0.15) 0%, transparent 60%),
+        #03222A;
+    }
+
+    /* ── Toast ── */
+    #toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: #0D1F2D;
+      color: #fff;
+      padding: 12px 24px;
+      border-radius: 12px;
+      font-weight: 500;
+      font-size: 0.9rem;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+      transition: transform 300ms cubic-bezier(0.34,1.56,0.64,1), opacity 300ms ease;
+      opacity: 0;
+      z-index: 9999;
+      white-space: nowrap;
+    }
+    #toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+
+    /* ── Mobile nav overlay ── */
+    #nav-menu {
+      transition: transform 280ms cubic-bezier(0.22,1,0.36,1), opacity 280ms ease;
+    }
+
+    /* ── Rating card ── */
+    .rating-card {
+      border-left: 4px solid #DDE6EB;
+      padding: 16px;
+      border-radius: 0 12px 12px 0;
+      background: #fff;
+      margin-bottom: 12px;
+    }
+    .rating-card.positive { border-color: #0E7A3D; }
+    .rating-card.negative { border-color: #B91C1C; }
+    .rating-card.neutral  { border-color: #D97706; }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: #F4F8FA; }
+    ::-webkit-scrollbar-thumb { background: #9BBFC8; border-radius: 3px; }
   </style>
 </head>
 <body>
 
-  <nav>
-    <!-- Navigation -->
-  </nav>
+<!-- ══════════════════════════════════════════════ NAV ══ -->
+<nav class="sticky top-0 z-50 bg-white/90 backdrop-blur-sm border-b border-[#DDE6EB]"
+     style="box-shadow: 0 1px 0 rgba(13,95,115,0.06), 0 2px 12px rgba(13,95,115,0.06)">
+  <div class="max-w-6xl mx-auto px-4 flex items-center justify-between h-16">
+    <button onclick="nav('home')" class="flex items-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-300 rounded-lg p-1">
+      <span class="text-2xl font-display font-bold tracking-tight" style="color:#0D5F73; letter-spacing:-0.03em">Street<span style="color:#D97706">Cred</span></span>
+    </button>
+    <div class="hidden sm:flex items-center gap-2">
+      <button onclick="nav('home')"     class="px-4 py-2 text-sm font-medium text-[#4A6674] rounded-lg hover:bg-[#EBF7FA] hover:text-[#0D5F73] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-300">Search</button>
+      <button onclick="nav('rate')"     class="px-4 py-2 text-sm font-medium text-[#4A6674] rounded-lg hover:bg-[#EBF7FA] hover:text-[#0D5F73] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-300">Rate a Plate</button>
+      <button onclick="nav('register')" class="px-4 py-2 text-sm font-medium text-[#4A6674] rounded-lg hover:bg-[#EBF7FA] hover:text-[#0D5F73] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-300">Register Mine</button>
+      <button onclick="nav('rate')" class="btn-primary ml-2" style="padding:8px 18px;font-size:0.875rem">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+        Submit Rating
+      </button>
+    </div>
+    <!-- Mobile hamburger -->
+    <button id="hamburger" onclick="toggleMenu()" class="sm:hidden p-2 rounded-lg text-[#4A6674] hover:bg-[#EBF7FA] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-300" aria-label="Menu">
+      <svg id="hamburger-icon" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+        <path d="M3 6h18M3 12h18M3 18h18"/>
+      </svg>
+    </button>
+  </div>
+  <!-- Mobile menu -->
+  <div id="nav-menu" class="sm:hidden hidden border-t border-[#DDE6EB] bg-white px-4 pb-4">
+    <div class="flex flex-col gap-1 pt-3">
+      <button onclick="nav('home');toggleMenu()"     class="text-left px-4 py-3 text-sm font-medium text-[#4A6674] rounded-lg hover:bg-[#EBF7FA] hover:text-[#0D5F73] transition-colors">Search</button>
+      <button onclick="nav('rate');toggleMenu()"     class="text-left px-4 py-3 text-sm font-medium text-[#4A6674] rounded-lg hover:bg-[#EBF7FA] hover:text-[#0D5F73] transition-colors">Rate a Plate</button>
+      <button onclick="nav('register');toggleMenu()" class="text-left px-4 py-3 text-sm font-medium text-[#4A6674] rounded-lg hover:bg-[#EBF7FA] hover:text-[#0D5F73] transition-colors">Register Mine</button>
+    </div>
+  </div>
+</nav>
 
-  <main>
-    <!-- Page content -->
-  </main>
+<!-- ══════════════════════════════════════════ VIEWS ══ -->
+<main id="app" class="min-h-screen">
 
-  <footer>
-    <!-- Footer -->
-  </footer>
+  <!-- ─── HOME ─── -->
+  <div id="view-home" class="view">
+    <!-- Hero -->
+    <section class="hero-bg noise relative overflow-hidden">
+      <div class="relative z-10 max-w-3xl mx-auto px-4 py-20 text-center text-white">
+        <div class="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full px-4 py-1.5 text-sm font-medium mb-6" style="color:rgba(255,255,255,0.85)">
+          <span class="w-2 h-2 rounded-full bg-green-400 animate-pulse inline-block"></span>
+          New Zealand's road reputation platform
+        </div>
+        <h1 class="text-5xl sm:text-6xl font-display font-bold mb-4" style="letter-spacing:-0.03em; line-height:1.1">
+          Every plate<br/>has a story.
+        </h1>
+        <p class="text-lg mb-10 max-w-xl mx-auto" style="color:rgba(255,255,255,0.72); line-height:1.7">
+          Rate drivers and parkers by licence plate. Look up any plate to see their road reputation, or share what you witnessed today.
+        </p>
+        <!-- Search -->
+        <div class="relative max-w-md mx-auto">
+          <input id="home-search"
+            type="text"
+            placeholder="Enter a plate — e.g. ABC123"
+            maxlength="7"
+            autocomplete="off"
+            autocapitalize="characters"
+            class="w-full pl-6 pr-20 py-4 rounded-2xl text-[#0D1F2D] font-display font-bold text-xl tracking-widest uppercase focus:outline-none"
+            style="box-shadow: 0 4px 24px rgba(0,0,0,0.25); letter-spacing:0.12em;"
+            oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9]/g,'')"
+            onkeydown="if(event.key==='Enter'&&this.value.length>=2)lookupPlate(this.value)"
+          />
+          <button onclick="lookupPlate(document.getElementById('home-search').value)"
+            class="absolute right-3 top-1/2 -translate-y-1/2 btn-primary" style="padding:10px 18px">
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          </button>
+          <!-- Suggestions -->
+          <div id="search-suggestions" class="absolute top-full left-0 right-0 mt-2 card card-elevated hidden z-20 overflow-hidden">
+          </div>
+        </div>
+        <!-- Quick actions -->
+        <div class="flex justify-center gap-3 mt-6 flex-wrap">
+          <button onclick="nav('rate')" class="btn-primary">
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 0 0 .95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 0 0-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 0 0-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 0 0-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 0 0 .951-.69l1.519-4.674z"/></svg>
+            Submit a rating
+          </button>
+          <button onclick="nav('register')" class="btn-secondary" style="color:#fff;border-color:rgba(255,255,255,0.4);background:rgba(255,255,255,0.1)">
+            Register my plate
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Recent feed -->
+    <section class="max-w-4xl mx-auto px-4 py-12">
+      <div class="flex items-center justify-between mb-6">
+        <h2 class="text-2xl font-display font-bold" style="letter-spacing:-0.02em">Recent ratings</h2>
+        <span class="text-sm text-[#4A6674]">New Zealand roads</span>
+      </div>
+      <div id="feed-list" class="space-y-3">
+        <div class="text-center py-12 text-[#4A6674]">Loading…</div>
+      </div>
+    </section>
+
+    <!-- How it works -->
+    <section class="bg-white border-t border-[#DDE6EB] py-16">
+      <div class="max-w-4xl mx-auto px-4">
+        <h2 class="text-2xl font-display font-bold text-center mb-10" style="letter-spacing:-0.02em">How it works</h2>
+        <div class="grid sm:grid-cols-3 gap-8">
+          <div class="text-center">
+            <div class="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4" style="background:#EBF7FA">
+              <svg width="28" height="28" fill="none" stroke="#0D5F73" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+            </div>
+            <h3 class="font-display font-bold text-lg mb-2">See something</h3>
+            <p class="text-sm text-[#4A6674]">Witness great or poor driving? Wait until you're safely parked, then open StreetCred.</p>
+          </div>
+          <div class="text-center">
+            <div class="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4" style="background:#EBF7FA">
+              <svg width="28" height="28" fill="none" stroke="#0D5F73" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M8 12h8M8 8h5M8 16h3"/></svg>
+            </div>
+            <h3 class="font-display font-bold text-lg mb-2">Enter the plate</h3>
+            <p class="text-sm text-[#4A6674]">Type the licence plate or upload a photo. Add the suburb or intersection so location context is captured.</p>
+          </div>
+          <div class="text-center">
+            <div class="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4" style="background:#EBF7FA">
+              <svg width="28" height="28" fill="none" stroke="#D97706" stroke-width="2" viewBox="0 0 24 24"><path d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 0 0 .95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 0 0-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 0 0-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 0 0-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 0 0 .951-.69l1.519-4.674z"/></svg>
+            </div>
+            <h3 class="font-display font-bold text-lg mb-2">Rate &amp; tag</h3>
+            <p class="text-sm text-[#4A6674]">Pick the event tags that match what happened, give a star rating, and submit. Drivers can dispute unfair ratings.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ─── RATE A PLATE ─── -->
+  <div id="view-rate" class="view">
+    <div class="max-w-xl mx-auto px-4 py-10">
+      <button onclick="nav('home')" class="flex items-center gap-2 text-sm text-[#4A6674] mb-6 hover:text-[#0D5F73] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-300 rounded">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+        Back
+      </button>
+
+      <!-- Step indicator -->
+      <div class="flex items-center gap-2 mb-8">
+        <div id="step-1" class="step-dot active"></div>
+        <div id="step-2" class="step-dot"></div>
+        <div id="step-3" class="step-dot"></div>
+        <div id="step-4" class="step-dot"></div>
+        <span id="step-label" class="text-sm text-[#4A6674] ml-2">Plate</span>
+      </div>
+
+      <!-- Step 1: Plate -->
+      <div id="rate-step-1">
+        <h2 class="text-3xl font-display font-bold mb-2" style="letter-spacing:-0.03em">Which plate?</h2>
+        <p class="text-[#4A6674] mb-6 text-sm">Please wait until you're safely parked before submitting.</p>
+        <div class="card p-6 space-y-5">
+          <div>
+            <label class="label">Licence plate <span class="text-red-500">*</span></label>
+            <input id="rate-plate" type="text" class="input font-display font-bold text-xl tracking-widest uppercase text-center" placeholder="ABC123" maxlength="7"
+              autocapitalize="characters" autocomplete="off"
+              oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9]/g,'')" />
+            <p class="text-xs text-[#4A6674] mt-2">NZ standard plates: 3 letters + 3 numbers (e.g. ABC123). Custom plates welcome too.</p>
+          </div>
+          <div>
+            <label class="label">Photo of plate <span class="text-xs font-normal text-[#4A6674]">(optional)</span></label>
+            <label id="photo-label" for="rate-photo" class="flex flex-col items-center gap-2 p-6 border-2 border-dashed border-[#DDE6EB] rounded-xl cursor-pointer hover:border-[#0D5F73] hover:bg-[#EBF7FA] transition-colors">
+              <svg width="28" height="28" fill="none" stroke="#9BBFC8" stroke-width="1.5" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+              <span class="text-sm text-[#4A6674]" id="photo-text">Upload a photo of the plate</span>
+            </label>
+            <input id="rate-photo" type="file" accept="image/*" class="hidden" onchange="photoSelected(this)" />
+          </div>
+          <button onclick="rateStep1Next()" class="btn-primary w-full justify-center">
+            Continue
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Step 2: Location -->
+      <div id="rate-step-2" class="hidden">
+        <h2 class="text-3xl font-display font-bold mb-2" style="letter-spacing:-0.03em">Where was it?</h2>
+        <p class="text-[#4A6674] mb-6 text-sm">Helps build local area reputation.</p>
+        <div class="card p-6 space-y-5">
+          <div>
+            <label class="label">Suburb / area <span class="text-xs font-normal text-[#4A6674]">(optional)</span></label>
+            <input id="rate-suburb" type="text" class="input" placeholder="e.g. Ponsonby, Auckland" />
+          </div>
+          <div>
+            <label class="label">Intersection / street <span class="text-xs font-normal text-[#4A6674]">(optional)</span></label>
+            <input id="rate-intersection" type="text" class="input" placeholder="e.g. K Rd & Ponsonby Rd" />
+          </div>
+          <div class="flex gap-3">
+            <button onclick="rateGoStep(1)" class="btn-secondary flex-1 justify-center">Back</button>
+            <button onclick="rateGoStep(3)" class="btn-primary flex-1 justify-center">
+              Continue
+              <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 3: Event tags -->
+      <div id="rate-step-3" class="hidden">
+        <h2 class="text-3xl font-display font-bold mb-2" style="letter-spacing:-0.03em">What happened?</h2>
+        <p class="text-[#4A6674] mb-6 text-sm">Pick all that apply. Mix positive and negative.</p>
+        <div class="card p-6">
+          <div id="tag-groups" class="space-y-5"></div>
+          <p id="tag-error" class="text-sm text-red-600 mt-3 hidden">Please select at least one tag.</p>
+          <div class="flex gap-3 mt-6">
+            <button onclick="rateGoStep(2)" class="btn-secondary flex-1 justify-center">Back</button>
+            <button onclick="rateStep3Next()" class="btn-primary flex-1 justify-center">
+              Continue
+              <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 4: Stars + submit -->
+      <div id="rate-step-4" class="hidden">
+        <h2 class="text-3xl font-display font-bold mb-2" style="letter-spacing:-0.03em">Your verdict</h2>
+        <p class="text-[#4A6674] mb-6 text-sm">1 star = terrible, 5 stars = excellent driver.</p>
+        <div class="card p-6 space-y-6">
+          <div>
+            <label class="label">Star rating <span class="text-red-500">*</span></label>
+            <div id="star-rater" class="flex gap-1 mt-1" role="radiogroup" aria-label="Star rating">
+              <button class="star-btn" data-val="1" onclick="setStars(1)" aria-label="1 star">★</button>
+              <button class="star-btn" data-val="2" onclick="setStars(2)" aria-label="2 stars">★</button>
+              <button class="star-btn" data-val="3" onclick="setStars(3)" aria-label="3 stars">★</button>
+              <button class="star-btn" data-val="4" onclick="setStars(4)" aria-label="4 stars">★</button>
+              <button class="star-btn" data-val="5" onclick="setStars(5)" aria-label="5 stars">★</button>
+            </div>
+            <p id="star-label" class="text-sm text-[#4A6674] mt-1">Tap a star</p>
+            <p id="stars-error" class="text-sm text-red-600 mt-1 hidden">Please select a star rating.</p>
+          </div>
+          <div>
+            <label class="label">Your name <span class="text-xs font-normal text-[#4A6674]">(optional)</span></label>
+            <input id="rate-name" type="text" class="input" placeholder="Leave blank to stay anonymous" />
+          </div>
+          <div class="flex gap-3">
+            <button onclick="rateGoStep(3)" class="btn-secondary flex-1 justify-center">Back</button>
+            <button id="submit-btn" onclick="submitRating()" class="btn-primary flex-1 justify-center">
+              Submit rating
+              <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 0 0 .95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 0 0-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 0 0-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 0 0-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 0 0 .951-.69l1.519-4.674z"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 5: Success -->
+      <div id="rate-step-5" class="hidden text-center py-8">
+        <div class="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6" style="background:#DCFCE7">
+          <svg width="40" height="40" fill="none" stroke="#0E7A3D" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <h2 class="text-2xl font-display font-bold mb-2">Rating submitted!</h2>
+        <p class="text-[#4A6674] mb-8">Thanks for contributing to safer NZ roads.</p>
+        <div class="flex gap-3 justify-center">
+          <button onclick="nav('home')" class="btn-secondary">Back to home</button>
+          <button id="view-plate-btn" onclick="" class="btn-primary">View plate profile</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── PLATE PROFILE ─── -->
+  <div id="view-plate" class="view">
+    <div class="max-w-3xl mx-auto px-4 py-10">
+      <button onclick="nav('home')" class="flex items-center gap-2 text-sm text-[#4A6674] mb-6 hover:text-[#0D5F73] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-300 rounded">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+        Back
+      </button>
+      <div id="plate-loading" class="text-center py-20 text-[#4A6674]">Loading plate profile…</div>
+      <div id="plate-content" class="hidden space-y-6">
+
+        <!-- Header card -->
+        <div class="card card-elevated p-6">
+          <div class="flex flex-col sm:flex-row sm:items-start gap-4">
+            <div class="flex-1">
+              <div class="flex items-center flex-wrap gap-3 mb-3">
+                <span id="profile-plate" class="plate plate-lg"></span>
+                <span id="profile-badge" class="hidden"></span>
+              </div>
+              <div id="profile-owner" class="text-sm text-[#4A6674] mb-1 hidden"></div>
+              <div id="profile-prev-owner" class="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-1.5 mb-2 hidden"></div>
+            </div>
+            <div class="text-center sm:text-right">
+              <div id="profile-stars-display" class="text-4xl stars-display mb-1"></div>
+              <div id="profile-avg" class="text-2xl font-display font-bold" style="color:#D97706"></div>
+              <div id="profile-count" class="text-sm text-[#4A6674]"></div>
+            </div>
+          </div>
+          <div class="flex gap-3 mt-4 pt-4 border-t border-[#DDE6EB] flex-wrap">
+            <button onclick="nav('rate',{plate:currentPlate})" class="btn-primary" style="padding:10px 18px;font-size:0.875rem">
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+              Rate this plate
+            </button>
+          </div>
+        </div>
+
+        <!-- Area breakdown -->
+        <div id="area-breakdown" class="card p-6 hidden">
+          <h3 class="font-display font-bold text-lg mb-4" style="letter-spacing:-0.02em">Area reputation</h3>
+          <div id="area-list" class="space-y-2"></div>
+        </div>
+
+        <!-- Ratings list -->
+        <div>
+          <h3 class="font-display font-bold text-lg mb-4" style="letter-spacing:-0.02em">Rating history</h3>
+          <div id="ratings-list" class="space-y-3"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── REGISTER ─── -->
+  <div id="view-register" class="view">
+    <div class="max-w-lg mx-auto px-4 py-10">
+      <button onclick="nav('home')" class="flex items-center gap-2 text-sm text-[#4A6674] mb-6 hover:text-[#0D5F73] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-300 rounded">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+        Back
+      </button>
+      <h2 class="text-3xl font-display font-bold mb-2" style="letter-spacing:-0.03em">Register your plate</h2>
+      <p class="text-[#4A6674] mb-8 text-sm">Verified owners get a badge on their profile. If you've just bought a used car, register now so future ratings are tied to your ownership.</p>
+
+      <div class="card p-6 space-y-5">
+        <div>
+          <label class="label">Licence plate <span class="text-red-500">*</span></label>
+          <input id="reg-plate" type="text" class="input font-display font-bold text-xl tracking-widest uppercase text-center" placeholder="ABC123" maxlength="7"
+            autocapitalize="characters" autocomplete="off"
+            oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9]/g,'')" />
+        </div>
+        <div>
+          <label class="label">First name <span class="text-red-500">*</span></label>
+          <input id="reg-name" type="text" class="input" placeholder="Your first name" autocomplete="given-name" />
+          <p class="text-xs text-[#4A6674] mt-1.5">Only your first name is shown publicly — never your surname.</p>
+        </div>
+        <div>
+          <label class="label">Email address <span class="text-red-500">*</span></label>
+          <input id="reg-email" type="email" class="input" placeholder="you@example.com" autocomplete="email" />
+        </div>
+        <div class="flex items-start gap-3 p-4 rounded-xl bg-[#F4F8FA] border border-[#DDE6EB]">
+          <input id="reg-show-email" type="checkbox" class="mt-1 w-4 h-4 accent-[#0D5F73] cursor-pointer" />
+          <label for="reg-show-email" class="text-sm text-[#4A6674] cursor-pointer">
+            <span class="font-semibold text-[#0D1F2D]">Show email publicly</span><br/>
+            By default your email is hidden. Tick this only if you want other drivers to see it on your profile.
+          </label>
+        </div>
+        <div class="p-4 rounded-xl bg-amber-50 border border-amber-200 text-sm text-amber-800">
+          <strong>Used car note:</strong> If someone else previously owned this plate, their old ratings will be marked "pre-ownership" so your profile starts fresh.
+        </div>
+        <div id="reg-error" class="text-sm text-red-600 hidden"></div>
+        <div id="reg-success" class="hidden text-center py-4">
+          <div class="w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-3" style="background:#DCFCE7">
+            <svg width="28" height="28" fill="none" stroke="#0E7A3D" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <p class="font-semibold text-[#0E7A3D]">Plate registered!</p>
+          <p class="text-sm text-[#4A6674] mt-1">Your profile now shows a verified badge.</p>
+        </div>
+        <button id="reg-btn" onclick="registerPlate()" class="btn-primary w-full justify-center">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4"/><path d="M21 12c0 4.97-4.03 9-9 9s-9-4.03-9-9 4.03-9 9-9 9 4.03 9 9z"/></svg>
+          Register plate
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── DISPUTE ─── -->
+  <div id="view-dispute" class="view">
+    <div class="max-w-lg mx-auto px-4 py-10">
+      <button onclick="goBack()" class="flex items-center gap-2 text-sm text-[#4A6674] mb-6 hover:text-[#0D5F73] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-300 rounded">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+        Back
+      </button>
+      <div id="dispute-content">
+        <div class="text-center py-20 text-[#4A6674]">Loading…</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── MODERATOR ─── -->
+  <div id="view-mod" class="view">
+    <div class="max-w-4xl mx-auto px-4 py-10">
+      <h2 class="text-2xl font-display font-bold mb-6" style="letter-spacing:-0.02em">Moderator dashboard</h2>
+      <div id="mod-auth" class="card p-6 max-w-sm">
+        <label class="label">Moderator password</label>
+        <input id="mod-pass" type="password" class="input mb-4" placeholder="Password"
+          onkeydown="if(event.key==='Enter')modLogin()" />
+        <button onclick="modLogin()" class="btn-primary w-full justify-center">Log in</button>
+        <p id="mod-auth-error" class="text-sm text-red-600 mt-3 hidden">Incorrect password.</p>
+      </div>
+      <div id="mod-queue" class="hidden space-y-4">
+        <div class="flex items-center justify-between mb-2">
+          <p class="text-sm text-[#4A6674]">Open disputes requiring moderation</p>
+          <button onclick="loadModQueue()" class="text-sm text-[#0D5F73] hover:underline">Refresh</button>
+        </div>
+        <div id="mod-disputes-list"></div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<!-- Toast -->
+<div id="toast"></div>
+
+<!-- Footer -->
+<footer class="border-t border-[#DDE6EB] bg-white py-8 mt-4">
+  <div class="max-w-6xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-[#4A6674]">
+    <span class="font-display font-bold" style="color:#0D5F73; letter-spacing:-0.02em">Street<span style="color:#D97706">Cred</span></span>
+    <span>NZ's road reputation platform &mdash; please rate responsibly.</span>
+    <button onclick="nav('mod')" class="hover:text-[#0D5F73] transition-colors">Moderator</button>
+  </div>
+</footer>
+
+<script>
+// ══════════════════════════════════════════════════════════════════════════════
+// DATA
+// ══════════════════════════════════════════════════════════════════════════════
+
+const EVENT_TAGS = [
+  { id:'tailgating',        label:'Tailgating',                        cat:'Dangerous',       pos:false },
+  { id:'phone_use',         label:'Phone while driving',               cat:'Dangerous',       pos:false },
+  { id:'ran_red',           label:'Ran a red light',                   cat:'Dangerous',       pos:false },
+  { id:'unsafe_lane',       label:'Unsafe lane change',                cat:'Dangerous',       pos:false },
+  { id:'speeding',          label:'Speeding in residential area',      cat:'Dangerous',       pos:false },
+  { id:'road_rage',         label:'Road rage / threats',               cat:'Rude',            pos:false },
+  { id:'aggressive_horn',   label:'Aggressive horn use',               cat:'Rude',            pos:false },
+  { id:'cut_off',           label:'Cut me off',                        cat:'Rude',            pos:false },
+  { id:'obscene',           label:'Obscene gesture',                   cat:'Rude',            pos:false },
+  { id:'blocking_driveway', label:'Blocking a driveway',               cat:'Parking',         pos:false },
+  { id:'double_parked',     label:'Double parked',                     cat:'Parking',         pos:false },
+  { id:'disabled_space',    label:'Disabled space (no permit)',        cat:'Parking',         pos:false },
+  { id:'two_spots',         label:'Taking two parking spots',          cat:'Parking',         pos:false },
+  { id:'right_arrow_fast',  label:'Fast off right-turn arrow ✓',       cat:'Traffic Lights',  pos:true  },
+  { id:'right_arrow_slow',  label:'Slow on right-turn arrow ✗',        cat:'Traffic Lights',  pos:false },
+  { id:'blocking_inter',    label:'Blocked intersection on red',       cat:'Traffic Lights',  pos:false },
+  { id:'amber_gamble',      label:'Ran amber/red light',               cat:'Traffic Lights',  pos:false },
+  { id:'let_in',            label:'Let me into traffic',               cat:'Courtesy',        pos:true  },
+  { id:'gave_way',          label:'Gave way generously',               cat:'Courtesy',        pos:true  },
+  { id:'tight_spot',        label:'Helped through a tight spot',       cat:'Courtesy',        pos:true  },
+  { id:'flash_through',     label:'Flashed to let me through',         cat:'Courtesy',        pos:true  },
+  { id:'waited_ped',        label:'Waited for pedestrian',             cat:'Courtesy',        pos:true  },
+  { id:'good_merge',        label:'Smooth, courteous merge',           cat:'Road Smarts',     pos:true  },
+  { id:'poor_merge',        label:'Forced merge without indicating',   cat:'Road Smarts',     pos:false },
+  { id:'no_indicate',       label:'Failed to indicate',                cat:'Road Smarts',     pos:false },
+  { id:'indicated_early',   label:'Indicated well in advance',         cat:'Road Smarts',     pos:true  },
+];
+
+const TAG_MAP = Object.fromEntries(EVENT_TAGS.map(t => [t.id, t]));
+
+const STAR_LABELS = ['','Terrible — dangerous driver','Poor — rude or careless','Average — nothing special','Good driver','Excellent — courteous & skilled'];
+
+// ══════════════════════════════════════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════════════════════════════════════
+
+let currentView = 'home';
+let currentPlate = null;
+let selectedStars = 0;
+let selectedTags = new Set();
+let rateData = { plate:'', photo:null };
+let modToken = null;
+let prevView = 'home';
+
+// ══════════════════════════════════════════════════════════════════════════════
+// NAVIGATION
+// ══════════════════════════════════════════════════════════════════════════════
+
+function nav(view, params = {}) {
+  prevView = currentView;
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  currentView = view;
+  const el = document.getElementById(`view-${view}`);
+  if (!el) return;
+  el.classList.add('active');
+
+  if (view === 'home') loadFeed();
+  if (view === 'rate') initRateForm(params);
+  if (view === 'plate' && params.plate) loadPlateProfile(params.plate);
+  if (view === 'dispute' && params.ratingId) loadDispute(params.ratingId, params.mode);
+  if (view === 'mod') { /* stays as login screen */ }
+
+  window.scrollTo({ top:0, behavior:'smooth' });
+}
+
+function goBack() { nav(prevView); }
+
+function toggleMenu() {
+  const m = document.getElementById('nav-menu');
+  m.classList.toggle('hidden');
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// TOAST
+// ══════════════════════════════════════════════════════════════════════════════
+
+function toast(msg, dur = 3000) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(el._t);
+  el._t = setTimeout(() => el.classList.remove('show'), dur);
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// FEED
+// ══════════════════════════════════════════════════════════════════════════════
+
+async function loadFeed() {
+  const list = document.getElementById('feed-list');
+  try {
+    const data = await api('/api/feed');
+    if (!data.length) {
+      list.innerHTML = '<div class="text-center py-12 text-[#4A6674]">No ratings yet — be the first to submit one!</div>';
+      return;
+    }
+    list.innerHTML = data.map(r => feedCard(r)).join('');
+  } catch(e) {
+    list.innerHTML = '<div class="text-center py-12 text-red-500">Could not load feed.</div>';
+  }
+}
+
+function feedCard(r) {
+  const avg = r.stars;
+  const tone = avg >= 4 ? 'positive' : avg <= 2 ? 'negative' : 'neutral';
+  const tags = (r.eventTags||[]).slice(0,3).map(id => {
+    const t = TAG_MAP[id];
+    if(!t) return '';
+    return `<span class="text-xs px-2 py-0.5 rounded-full ${t.pos?'bg-green-100 text-green-800':'bg-red-100 text-red-800'}">${t.label}</span>`;
+  }).join('');
+  const loc = r.location_suburb ? `<span class="text-xs text-[#4A6674]">📍 ${r.location_suburb}</span>` : '';
+  const ago = timeAgo(r.created_at);
+  return `
+    <div class="rating-card ${tone}">
+      <div class="flex items-start justify-between gap-4">
+        <div class="flex items-center gap-3 flex-wrap">
+          <button onclick="lookupPlate('${r.plate_number}')" class="plate text-base hover:opacity-75 transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-300 rounded">${r.plate_number}</button>
+          ${r.registered ? `<span class="badge-verified"><svg width="12" height="12" fill="currentColor" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>Verified</span>` : ''}
+          ${r.owner_first_name ? `<span class="text-sm text-[#4A6674]">${r.owner_first_name}</span>` : ''}
+        </div>
+        <div class="text-right flex-shrink-0">
+          <div class="text-xl" style="color:#D97706">${'★'.repeat(avg)}${'★'.repeat(5-avg).replace(/★/g,'<span style="color:#DDE6EB">★</span>')}</div>
+        </div>
+      </div>
+      <div class="flex flex-wrap gap-1.5 mt-2">${tags}</div>
+      <div class="flex items-center gap-3 mt-2 flex-wrap">
+        ${loc}
+        <span class="text-xs text-[#9BBFC8]">${ago}</span>
+      </div>
+    </div>`;
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// SEARCH
+// ══════════════════════════════════════════════════════════════════════════════
+
+let searchTimeout;
+document.getElementById('home-search').addEventListener('input', function() {
+  clearTimeout(searchTimeout);
+  const q = this.value.trim();
+  const box = document.getElementById('search-suggestions');
+  if (q.length < 2) { box.classList.add('hidden'); return; }
+  searchTimeout = setTimeout(async () => {
+    const res = await api(`/api/search?q=${q}`);
+    if (!res.length) { box.classList.add('hidden'); return; }
+    box.innerHTML = res.map(p => `
+      <button onclick="lookupPlate('${p.plate_number}')" class="w-full text-left px-4 py-3 hover:bg-[#EBF7FA] flex items-center gap-3 border-b border-[#F4F8FA] last:border-0 transition-colors focus-visible:outline-none focus-visible:bg-[#EBF7FA]">
+        <span class="plate" style="font-size:1rem;padding:3px 10px">${p.plate_number}</span>
+        <span class="text-sm text-[#4A6674]">${p.rating_count} rating${p.rating_count!==1?'s':''}</span>
+        ${p.avg_stars ? `<span class="ml-auto text-sm" style="color:#D97706">${starDisplay(p.avg_stars)}</span>` : ''}
+      </button>
+    `).join('');
+    box.classList.remove('hidden');
+  }, 200);
+});
+
+document.addEventListener('click', e => {
+  if (!e.target.closest('#home-search') && !e.target.closest('#search-suggestions')) {
+    document.getElementById('search-suggestions').classList.add('hidden');
+  }
+});
+
+function lookupPlate(plate) {
+  plate = plate.toUpperCase().replace(/[^A-Z0-9]/g,'');
+  if (!plate) return;
+  document.getElementById('search-suggestions').classList.add('hidden');
+  currentPlate = plate;
+  nav('plate', { plate });
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// PLATE PROFILE
+// ══════════════════════════════════════════════════════════════════════════════
+
+async function loadPlateProfile(plate) {
+  currentPlate = plate;
+  document.getElementById('plate-loading').classList.remove('hidden');
+  document.getElementById('plate-content').classList.add('hidden');
+
+  try {
+    const d = await api(`/api/plates/${plate}`);
+
+    document.getElementById('profile-plate').textContent = d.plate;
+
+    // Badge
+    const badge = document.getElementById('profile-badge');
+    if (d.registered) {
+      badge.innerHTML = `<span class="badge-verified"><svg width="12" height="12" fill="currentColor" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>Verified owner</span>`;
+      badge.classList.remove('hidden');
+    } else {
+      badge.classList.add('hidden');
+    }
+
+    // Owner name
+    const ownerEl = document.getElementById('profile-owner');
+    if (d.ownerFirstName) {
+      ownerEl.textContent = `Registered to: ${d.ownerFirstName}${d.ownerEmail ? ` · ${d.ownerEmail}` : ''}`;
+      ownerEl.classList.remove('hidden');
+    } else {
+      ownerEl.classList.add('hidden');
+    }
+
+    // Previous owner note
+    const prevEl = document.getElementById('profile-prev-owner');
+    if (d.previousOwnerCutoff) {
+      prevEl.textContent = `⚠️ Ratings before ${new Date(d.previousOwnerCutoff*1000).toLocaleDateString('en-NZ')} are from a previous owner.`;
+      prevEl.classList.remove('hidden');
+    } else {
+      prevEl.classList.add('hidden');
+    }
+
+    // Stars
+    const starsEl = document.getElementById('profile-stars-display');
+    const avgEl   = document.getElementById('profile-avg');
+    const countEl = document.getElementById('profile-count');
+    if (d.avgStars !== null) {
+      const avg = parseFloat(d.avgStars.toFixed(1));
+      starsEl.innerHTML = starDisplayFull(avg);
+      avgEl.textContent  = avg.toFixed(1) + ' / 5.0';
+      countEl.textContent = `${d.totalRatings} rating${d.totalRatings!==1?'s':''}`;
+    } else {
+      starsEl.innerHTML  = '<span style="color:#DDE6EB">★★★★★</span>';
+      avgEl.textContent  = 'No ratings yet';
+      countEl.textContent = '';
+    }
+
+    // Area breakdown
+    const areaSection = document.getElementById('area-breakdown');
+    const areaList    = document.getElementById('area-list');
+    if (d.areaBreakdown && d.areaBreakdown.length) {
+      areaList.innerHTML = d.areaBreakdown.map(a => `
+        <div class="flex items-center justify-between py-2 border-b border-[#F4F8FA] last:border-0">
+          <span class="text-sm font-medium">📍 ${a.location_suburb}</span>
+          <div class="flex items-center gap-2">
+            <span class="text-xs text-[#4A6674]">${a.count} rating${a.count!==1?'s':''}</span>
+            <span class="text-sm" style="color:#D97706">${starDisplay(a.avg_stars)}</span>
+          </div>
+        </div>`).join('');
+      areaSection.classList.remove('hidden');
+    } else {
+      areaSection.classList.add('hidden');
+    }
+
+    // Ratings
+    const ratingsList = document.getElementById('ratings-list');
+    if (d.ratings.length) {
+      ratingsList.innerHTML = d.ratings.map(r => ratingCard(r, plate)).join('');
+    } else {
+      ratingsList.innerHTML = '<div class="text-[#4A6674] text-sm py-6 text-center">No ratings yet for this plate.</div>';
+    }
+
+    document.getElementById('plate-loading').classList.add('hidden');
+    document.getElementById('plate-content').classList.remove('hidden');
+  } catch(e) {
+    document.getElementById('plate-loading').textContent = 'Error loading profile.';
+  }
+}
+
+function ratingCard(r, plate) {
+  const tone = r.stars >= 4 ? 'positive' : r.stars <= 2 ? 'negative' : 'neutral';
+  const tags = (r.eventTags||[]).map(id => {
+    const t = TAG_MAP[id];
+    if(!t) return '';
+    return `<span class="text-xs px-2 py-0.5 rounded-full ${t.pos?'bg-green-100 text-green-800':'bg-red-100 text-red-800'}">${t.label}</span>`;
+  }).join('');
+  const loc = [r.locationSuburb, r.locationIntersection].filter(Boolean).join(' · ');
+  const disputeBtn = !r.disputed
+    ? `<button onclick="nav('dispute',{ratingId:${r.id},mode:'file'})" class="text-xs text-[#0D5F73] hover:underline focus-visible:outline-none focus-visible:underline">Dispute this rating</button>`
+    : r.disputeStatus === 'accused_responded'
+      ? `<button onclick="nav('dispute',{ratingId:${r.id},mode:'accuser'})" class="text-xs text-amber-700 hover:underline">Response received — review dispute</button>`
+      : `<span class="text-xs text-[#4A6674]">Dispute ${r.disputeStatus||'pending'}</span>`;
+
+  return `
+    <div class="rating-card ${tone}">
+      <div class="flex items-start justify-between gap-2">
+        <div>
+          <div class="text-sm font-medium text-[#0D1F2D]">${r.raterName || 'Anonymous'}</div>
+          ${loc ? `<div class="text-xs text-[#4A6674]">📍 ${loc}</div>` : ''}
+        </div>
+        <div class="flex-shrink-0 text-lg" style="color:#D97706">${'★'.repeat(r.stars)}<span style="color:#DDE6EB">${'★'.repeat(5-r.stars)}</span></div>
+      </div>
+      ${r.photoPath ? `<img src="/uploads/${r.photoPath}" alt="Photo of licence plate ${plate}" width="400" height="128" loading="lazy" class="mt-3 rounded-lg max-h-32 object-cover" />` : ''}
+      <div class="flex flex-wrap gap-1.5 mt-2">${tags}</div>
+      <div class="flex items-center justify-between mt-3 flex-wrap gap-2">
+        <span class="text-xs text-[#9BBFC8]">${timeAgo(r.createdAt)}</span>
+        ${disputeBtn}
+      </div>
+    </div>`;
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// RATE FORM
+// ══════════════════════════════════════════════════════════════════════════════
+
+function initRateForm(params = {}) {
+  rateData = { plate: params.plate || '', photo: null };
+  selectedStars = 0;
+  selectedTags = new Set();
+
+  document.getElementById('rate-plate').value = rateData.plate;
+  document.getElementById('rate-suburb').value = '';
+  document.getElementById('rate-intersection').value = '';
+  document.getElementById('rate-name').value = '';
+  document.getElementById('photo-text').textContent = 'Upload a photo of the plate';
+  document.getElementById('stars-error').classList.add('hidden');
+  document.getElementById('tag-error').classList.add('hidden');
+
+  updateStarDisplay();
+  buildTagGroups();
+  rateGoStep(1);
+}
+
+function rateGoStep(n) {
+  for (let i = 1; i <= 5; i++) {
+    const el = document.getElementById(`rate-step-${i}`);
+    if (el) el.classList.toggle('hidden', i !== n);
+  }
+  const dots = document.querySelectorAll('.step-dot');
+  dots.forEach((d, i) => {
+    d.classList.remove('active','done');
+    if (i+1 === n) d.classList.add('active');
+    else if (i+1 < n) d.classList.add('done');
+  });
+  const labels = ['Plate','Location','Events','Verdict'];
+  const lbl = document.getElementById('step-label');
+  if (lbl && labels[n-1]) lbl.textContent = labels[n-1];
+}
+
+function rateStep1Next() {
+  const plate = document.getElementById('rate-plate').value.trim();
+  if (plate.length < 2) { toast('Please enter a valid plate number.'); return; }
+  rateData.plate = plate;
+  rateGoStep(2);
+}
+
+function rateStep3Next() {
+  if (selectedTags.size === 0) {
+    document.getElementById('tag-error').classList.remove('hidden');
+    return;
+  }
+  document.getElementById('tag-error').classList.add('hidden');
+  rateGoStep(4);
+}
+
+function photoSelected(input) {
+  if (input.files[0]) {
+    rateData.photo = input.files[0];
+    document.getElementById('photo-text').textContent = `📷 ${input.files[0].name}`;
+  }
+}
+
+function buildTagGroups() {
+  const cats = {};
+  EVENT_TAGS.forEach(t => {
+    if (!cats[t.cat]) cats[t.cat] = [];
+    cats[t.cat].push(t);
+  });
+  document.getElementById('tag-groups').innerHTML = Object.entries(cats).map(([cat, tags]) => `
+    <div>
+      <div class="text-xs font-bold uppercase tracking-widest text-[#4A6674] mb-2">${cat}</div>
+      <div class="flex flex-wrap gap-2">
+        ${tags.map(t => `
+          <button id="tag-${t.id}" onclick="toggleTag('${t.id}')" class="tag-chip" type="button">${t.label}</button>
+        `).join('')}
+      </div>
+    </div>`).join('');
+}
+
+function toggleTag(id) {
+  const t = TAG_MAP[id];
+  const btn = document.getElementById(`tag-${id}`);
+  if (selectedTags.has(id)) {
+    selectedTags.delete(id);
+    btn.classList.remove('selected-neg','selected-pos');
+  } else {
+    selectedTags.add(id);
+    btn.classList.add(t.pos ? 'selected-pos' : 'selected-neg');
+  }
+  document.getElementById('tag-error').classList.add('hidden');
+}
+
+function setStars(n) {
+  selectedStars = n;
+  updateStarDisplay();
+  document.getElementById('stars-error').classList.add('hidden');
+}
+
+function updateStarDisplay() {
+  document.querySelectorAll('.star-btn').forEach(btn => {
+    const v = parseInt(btn.dataset.val);
+    btn.classList.toggle('active', v <= selectedStars);
+  });
+  const lbl = document.getElementById('star-label');
+  if (lbl) lbl.textContent = STAR_LABELS[selectedStars] || 'Tap a star';
+}
+
+async function submitRating() {
+  if (!selectedStars) {
+    document.getElementById('stars-error').classList.remove('hidden');
+    return;
+  }
+  const btn = document.getElementById('submit-btn');
+  btn.disabled = true;
+  btn.textContent = 'Submitting…';
+
+  const fd = new FormData();
+  fd.append('plate', rateData.plate);
+  fd.append('stars', selectedStars);
+  fd.append('eventTags', JSON.stringify([...selectedTags]));
+  fd.append('locationSuburb', document.getElementById('rate-suburb').value.trim());
+  fd.append('locationIntersection', document.getElementById('rate-intersection').value.trim());
+  fd.append('raterName', document.getElementById('rate-name').value.trim());
+  if (rateData.photo) fd.append('photo', rateData.photo);
+
+  try {
+    await fetch('/api/ratings', { method:'POST', body:fd });
+    document.getElementById('view-plate-btn').onclick = () => lookupPlate(rateData.plate);
+    rateGoStep(5);
+  } catch(e) {
+    toast('Something went wrong — please try again.');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Submit rating';
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// REGISTER
+// ══════════════════════════════════════════════════════════════════════════════
+
+async function registerPlate() {
+  const plate     = document.getElementById('reg-plate').value.trim();
+  const firstName = document.getElementById('reg-name').value.trim();
+  const email     = document.getElementById('reg-email').value.trim();
+  const showEmail = document.getElementById('reg-show-email').checked;
+  const errEl     = document.getElementById('reg-error');
+
+  errEl.classList.add('hidden');
+  if (!plate || !firstName || !email) {
+    errEl.textContent = 'Please fill in all required fields.';
+    errEl.classList.remove('hidden');
+    return;
+  }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    errEl.textContent = 'Please enter a valid email address.';
+    errEl.classList.remove('hidden');
+    return;
+  }
+
+  const btn = document.getElementById('reg-btn');
+  btn.disabled = true;
+  btn.textContent = 'Registering…';
+
+  try {
+    const res = await api('/api/plates/register', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ plate, firstName, email, showEmail }),
+    });
+    if (res.success) {
+      document.getElementById('reg-success').classList.remove('hidden');
+      btn.classList.add('hidden');
+    } else {
+      errEl.textContent = res.error || 'Something went wrong.';
+      errEl.classList.remove('hidden');
+    }
+  } catch(e) {
+    errEl.textContent = 'Something went wrong — please try again.';
+    errEl.classList.remove('hidden');
+  } finally {
+    btn.disabled = false;
+    if (btn.textContent === 'Registering…') btn.textContent = 'Register plate';
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// DISPUTES
+// ══════════════════════════════════════════════════════════════════════════════
+
+async function loadDispute(ratingId, mode) {
+  const el = document.getElementById('dispute-content');
+  el.innerHTML = '<div class="text-center py-20 text-[#4A6674]">Loading…</div>';
+
+  try {
+    const rating = await api(`/api/ratings/${ratingId}`);
+
+    if (mode === 'file') {
+      // Accused files dispute
+      el.innerHTML = `
+        <h2 class="text-3xl font-display font-bold mb-2" style="letter-spacing:-0.03em">Dispute a rating</h2>
+        <p class="text-[#4A6674] mb-6 text-sm">You're disputing a rating on <strong>${rating.plate_number}</strong>. Describe what actually happened — the original rater will see your response.</p>
+        <div class="card p-6 space-y-5">
+          <div class="rating-card ${rating.stars>=4?'positive':rating.stars<=2?'negative':'neutral'}">
+            <div class="flex items-center justify-between gap-2">
+              <div class="text-sm font-medium">Rating by ${rating.rater_name||'Anonymous'}</div>
+              <div style="color:#D97706">${'★'.repeat(rating.stars)}<span style="color:#DDE6EB">${'★'.repeat(5-rating.stars)}</span></div>
+            </div>
+            <div class="flex flex-wrap gap-1.5 mt-2">
+              ${(rating.eventTags||[]).map(id=>{ const t=TAG_MAP[id]; return t?`<span class="text-xs px-2 py-0.5 rounded-full ${t.pos?'bg-green-100 text-green-800':'bg-red-100 text-red-800'}">${t.label}</span>`:''}).join('')}
+            </div>
+          </div>
+          <div>
+            <label class="label">Your side of the story <span class="text-red-500">*</span></label>
+            <textarea id="dispute-response" class="input" rows="4" placeholder="Describe what actually happened from your perspective…" style="resize:vertical"></textarea>
+          </div>
+          <p id="dispute-error" class="text-sm text-red-600 hidden"></p>
+          <button onclick="fileDispute(${ratingId})" class="btn-primary w-full justify-center">Submit dispute</button>
+        </div>`;
+    } else if (mode === 'accuser') {
+      // Original rater reviews accused response
+      let dispute = null;
+      try { dispute = await api(`/api/disputes/${rating.dispute_id||ratingId}`); } catch(e) {}
+      el.innerHTML = `
+        <h2 class="text-3xl font-display font-bold mb-2" style="letter-spacing:-0.03em">Review dispute</h2>
+        <p class="text-[#4A6674] mb-6 text-sm">The driver has responded to your rating on <strong>${rating.plate_number}</strong>. You can uphold your rating or drop it.</p>
+        <div class="card p-6 space-y-4">
+          ${dispute ? `
+            <div>
+              <div class="text-xs font-bold uppercase tracking-widest text-[#4A6674] mb-2">Their response</div>
+              <p class="text-sm text-[#0D1F2D] bg-[#F4F8FA] rounded-xl p-4">${dispute.accused_response}</p>
+            </div>
+          ` : ''}
+          <div class="flex gap-3 pt-2">
+            <button onclick="accuserDecide(${ratingId},'dropped')" class="btn-secondary flex-1 justify-center">Drop rating</button>
+            <button onclick="accuserDecide(${ratingId},'upheld')" class="btn-danger flex-1 justify-center">Uphold rating</button>
+          </div>
+        </div>`;
+    }
+  } catch(e) {
+    el.innerHTML = '<div class="text-red-500 text-center py-12">Could not load dispute.</div>';
+  }
+}
+
+async function fileDispute(ratingId) {
+  const response = document.getElementById('dispute-response').value.trim();
+  const errEl = document.getElementById('dispute-error');
+  if (!response) { errEl.textContent = 'Please describe your side of the event.'; errEl.classList.remove('hidden'); return; }
+  errEl.classList.add('hidden');
+  try {
+    await api('/api/disputes', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ ratingId, response }) });
+    document.getElementById('dispute-content').innerHTML = `
+      <div class="text-center py-12">
+        <div class="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4" style="background:#DCFCE7">
+          <svg width="32" height="32" fill="none" stroke="#0E7A3D" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <h3 class="text-xl font-display font-bold mb-2">Dispute filed</h3>
+        <p class="text-[#4A6674] text-sm">The rater has been notified and can now review your response.</p>
+        <button onclick="nav('home')" class="btn-primary mt-6">Back to home</button>
+      </div>`;
+  } catch(e) {
+    errEl.textContent = e.message || 'Something went wrong.';
+    errEl.classList.remove('hidden');
+  }
+}
+
+async function accuserDecide(ratingId, decision) {
+  try {
+    // We need the dispute id from the rating
+    const rating = await api(`/api/ratings/${ratingId}`);
+    await api(`/api/disputes/${rating.dispute_id}/accuser`, {
+      method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ decision })
+    });
+    const msg = decision === 'dropped' ? 'Rating dropped — the dispute has been resolved.' : 'Rating upheld — the dispute has been escalated to a moderator.';
+    document.getElementById('dispute-content').innerHTML = `
+      <div class="text-center py-12">
+        <h3 class="text-xl font-display font-bold mb-2">Decision recorded</h3>
+        <p class="text-[#4A6674] text-sm">${msg}</p>
+        <button onclick="nav('home')" class="btn-primary mt-6">Back to home</button>
+      </div>`;
+  } catch(e) {
+    toast('Something went wrong — please try again.');
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// MODERATOR
+// ══════════════════════════════════════════════════════════════════════════════
+
+async function modLogin() {
+  const pass = document.getElementById('mod-pass').value;
+  const errEl = document.getElementById('mod-auth-error');
+  modToken = pass;
+  try {
+    const data = await api('/api/mod/disputes', { headers:{ Authorization:`Bearer ${pass}` } });
+    errEl.classList.add('hidden');
+    document.getElementById('mod-auth').classList.add('hidden');
+    document.getElementById('mod-queue').classList.remove('hidden');
+    renderModQueue(data);
+  } catch(e) {
+    errEl.classList.remove('hidden');
+    modToken = null;
+  }
+}
+
+async function loadModQueue() {
+  const data = await api('/api/mod/disputes', { headers:{ Authorization:`Bearer ${modToken}` } });
+  renderModQueue(data);
+}
+
+function renderModQueue(data) {
+  const el = document.getElementById('mod-disputes-list');
+  if (!data.length) { el.innerHTML = '<div class="text-[#4A6674] text-sm py-6 text-center">No open disputes — queue is clear.</div>'; return; }
+  el.innerHTML = data.map(d => `
+    <div class="card p-5 space-y-3">
+      <div class="flex items-center gap-3 flex-wrap">
+        <span class="plate">${d.plate_number}</span>
+        <span class="text-sm text-[#4A6674]">Rating #${d.rating_id}</span>
+        <span class="text-xs px-2 py-0.5 rounded-full bg-amber-100 text-amber-800">${d.status}</span>
+      </div>
+      <div>
+        <div class="text-xs font-bold uppercase tracking-widest text-[#4A6674] mb-1">Original rating</div>
+        <div style="color:#D97706">${'★'.repeat(d.stars)}</div>
+        <div class="flex flex-wrap gap-1 mt-1">
+          ${(d.eventTags||[]).map(id=>{ const t=TAG_MAP[id]; return t?`<span class="text-xs px-2 py-0.5 rounded-full bg-[#F4F8FA] text-[#4A6674]">${t.label}</span>`:''}).join('')}
+        </div>
+      </div>
+      ${d.accused_response ? `
+        <div>
+          <div class="text-xs font-bold uppercase tracking-widest text-[#4A6674] mb-1">Accused response</div>
+          <p class="text-sm bg-[#F4F8FA] rounded-xl p-3">${d.accused_response}</p>
+        </div>` : ''}
+      <div>
+        <label class="label">Moderator notes</label>
+        <textarea id="mod-notes-${d.id}" class="input text-sm" rows="2" placeholder="Optional notes for the record…" style="resize:vertical"></textarea>
+      </div>
+      <div class="flex gap-3">
+        <button onclick="modDecide(${d.id},'dropped')" class="btn-secondary flex-1 justify-center text-sm" style="padding:8px 12px">Drop rating</button>
+        <button onclick="modDecide(${d.id},'upheld')" class="btn-danger flex-1 justify-center text-sm" style="padding:8px 12px">Uphold rating</button>
+      </div>
+    </div>`).join('');
+}
+
+async function modDecide(disputeId, decision) {
+  const notes = document.getElementById(`mod-notes-${disputeId}`)?.value || '';
+  try {
+    await api(`/api/mod/disputes/${disputeId}`, {
+      method:'PUT',
+      headers:{ 'Content-Type':'application/json', Authorization:`Bearer ${modToken}` },
+      body: JSON.stringify({ decision, notes }),
+    });
+    toast('Decision recorded.');
+    loadModQueue();
+  } catch(e) {
+    toast('Error saving decision.');
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// HELPERS
+// ══════════════════════════════════════════════════════════════════════════════
+
+async function api(url, opts = {}) {
+  const res = await fetch(url, opts);
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error || `HTTP ${res.status}`);
+  }
+  return res.json();
+}
+
+function starDisplay(avg) {
+  const full = Math.round(avg);
+  return '★'.repeat(Math.min(full,5)) + '☆'.repeat(Math.max(0,5-full));
+}
+
+function starDisplayFull(avg) {
+  const full = Math.floor(avg);
+  const half = avg - full >= 0.5;
+  let h = '';
+  for(let i=1;i<=5;i++){
+    if(i<=full) h += '<span style="color:#D97706">★</span>';
+    else if(i===full+1&&half) h += '<span style="color:#D97706;opacity:0.6">★</span>';
+    else h += '<span style="color:#DDE6EB">★</span>';
+  }
+  return h;
+}
+
+function timeAgo(ts) {
+  if (!ts) return '';
+  const s = Math.floor(Date.now()/1000) - ts;
+  if (s < 60) return 'just now';
+  if (s < 3600) return `${Math.floor(s/60)}m ago`;
+  if (s < 86400) return `${Math.floor(s/3600)}h ago`;
+  if (s < 2592000) return `${Math.floor(s/86400)}d ago`;
+  return new Date(ts*1000).toLocaleDateString('en-NZ');
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// BOOT
+// ══════════════════════════════════════════════════════════════════════════════
+
+nav('home');
+</script>
 
 </body>
 </html>

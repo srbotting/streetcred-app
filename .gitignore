@@ -1,2 +1,7 @@
 node_modules/
 temporary screenshots/
+uploads/
+streetcred.db
+server-out.txt
+server-err.txt
+.claude/

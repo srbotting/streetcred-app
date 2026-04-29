@@ -1,9 +1,18 @@
 {
-  "name": "website-stub",
+  "name": "streetcred-app",
   "version": "1.0.0",
-  "description": "Frontend website starter template",
+  "description": "Rate drivers and parkers by licence plate — StreetCred NZ",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
   "license": "ISC",
   "dependencies": {
+    "express": "^4.21.0",
+    "multer": "^2.0.0",
+    "sql.js": "^1.12.0",
     "puppeteer": "^24.41.0"
   }
 }
