@@ -8,6 +8,20 @@
   <meta name="robots" content="index, follow" />
   <link rel="canonical" href="https://streetcred.nz/" />
 
+  <!-- Google Analytics (production only) -->
+  <script>
+    if (location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {
+      const s = document.createElement('script');
+      s.async = true;
+      s.src = 'https://www.googletagmanager.com/gtag/js?id=G-KZS819GEEF';
+      document.head.appendChild(s);
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-KZS819GEEF');
+    }
+  </script>
+
   <!-- Open Graph -->
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://streetcred.nz/" />
