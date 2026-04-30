@@ -248,6 +248,10 @@
     }
     .tag-chip:hover { border-color: #0D5F73; color: #0D5F73; background: #EBF7FA; }
     .tag-chip:focus-visible { outline: 3px solid #4FBAD6; outline-offset: 2px; }
+    .tag-chip.hint-neg { border-color: #FECACA; background: #FFF5F5; color: #4A6674; }
+    .tag-chip.hint-pos { border-color: #BBF7D0; background: #F0FFF4; color: #4A6674; }
+    .tag-chip.hint-neg:hover { border-color: #B91C1C; background: #FEF2F2; color: #B91C1C; }
+    .tag-chip.hint-pos:hover { border-color: #0E7A3D; background: #DCFCE7; color: #0E7A3D; }
     .tag-chip.selected-neg { border-color: #B91C1C; background: #FEF2F2; color: #B91C1C; }
     .tag-chip.selected-pos { border-color: #0E7A3D; background: #DCFCE7; color: #0E7A3D; }
 
@@ -1298,7 +1302,7 @@ function buildTagGroups() {
       <div class="text-xs font-bold uppercase tracking-widest text-[#4A6674] mb-2">${cat}</div>
       <div class="flex flex-wrap gap-2">
         ${tags.map(t => `
-          <button id="tag-${t.id}" onclick="toggleTag('${t.id}')" class="tag-chip" type="button">${t.label}</button>
+          <button id="tag-${t.id}" onclick="toggleTag('${t.id}')" class="tag-chip ${t.pos ? 'hint-pos' : 'hint-neg'}" type="button">${t.label}</button>
         `).join('')}
       </div>
     </div>`).join('');
@@ -1310,8 +1314,10 @@ function toggleTag(id) {
   if (selectedTags.has(id)) {
     selectedTags.delete(id);
     btn.classList.remove('selected-neg','selected-pos');
+    btn.classList.add(t.pos ? 'hint-pos' : 'hint-neg');
   } else {
     selectedTags.add(id);
+    btn.classList.remove('hint-neg','hint-pos');
     btn.classList.add(t.pos ? 'selected-pos' : 'selected-neg');
   }
   document.getElementById('tag-error').classList.add('hidden');
