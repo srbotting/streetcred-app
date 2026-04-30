@@ -9,15 +9,16 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PORT = process.env.PORT || 3000;
 const MOD_PASSWORD = process.env.MOD_PASSWORD || 'streetcred-mod-2024';
 
-mkdirSync(path.join(__dirname, 'uploads'), { recursive: true });
+const UPLOADS_PATH = process.env.UPLOADS_PATH || path.join(__dirname, 'uploads');
+mkdirSync(UPLOADS_PATH, { recursive: true });
 
 const app = express();
 app.use(express.json());
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use('/uploads', express.static(UPLOADS_PATH));
 app.use(express.static(__dirname));
 
 const storage = multer.diskStorage({
-  destination: 'uploads/',
+  destination: UPLOADS_PATH,
   filename: (req, file, cb) => cb(null, `${Date.now()}-${Math.random().toString(36).slice(2)}${path.extname(file.originalname)}`),
 });
 const upload = multer({

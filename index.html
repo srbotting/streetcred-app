@@ -553,7 +553,10 @@
         <div class="card p-6 space-y-5">
           <div>
             <label class="label">Suburb / area <span class="text-xs font-normal text-[#4A6674]">(optional)</span></label>
-            <input id="rate-suburb" type="text" class="input" placeholder="e.g. Ponsonby, Auckland" />
+            <div class="relative">
+              <input id="rate-suburb" type="text" class="input" placeholder="e.g. Ponsonby" autocomplete="off" oninput="suburbInput(this)" onblur="setTimeout(()=>closeSuburbDropdown(),150)" />
+              <div id="suburb-suggestions" class="hidden absolute left-0 right-0 top-full mt-1 bg-white border border-[#DDE6EB] rounded-xl shadow-lg z-20 max-h-52 overflow-y-auto"></div>
+            </div>
           </div>
           <div>
             <label class="label">Intersection / street <span class="text-xs font-normal text-[#4A6674]">(optional)</span></label>
@@ -880,6 +883,65 @@ const TAG_MAP = Object.fromEntries(EVENT_TAGS.map(t => [t.id, t]));
 
 const STAR_LABELS = ['','Terrible — dangerous driver','Poor — rude or careless','Average — nothing special','Good driver','Excellent — courteous & skilled'];
 
+const NZ_SUBURBS = [
+  // Auckland — North Shore
+  'Albany','Bayswater','Beach Haven','Belmont','Birkdale','Birkenhead','Browns Bay','Campbells Bay','Castor Bay','Chatswood','Devonport','East Coast Bays','Forrest Hill','Glenfield','Greenhithe','Hillcrest','Long Bay','Mairangi Bay','Milford','Murrays Bay','Northcote','Northcote Point','Rosedale','Rothesay Bay','Sunnynook','Takapuna','Torbay','Unsworth Heights','Wairau Valley','Windsor Park',
+  // Auckland — Waitematā
+  'Auckland CBD','Arch Hill','Eden Terrace','Freemans Bay','Grafton','Grey Lynn','Herne Bay','Kingsland','Morningside','Mount Albert','Newton','Parnell','Point Chevalier','Ponsonby','Saint Marys Bay','Sandringham','Waterview','Western Springs','Westmere',
+  // Auckland — Albert-Eden
+  'Balmoral','Eden Valley','Epsom','Greenlane','Mount Eden','Mount Roskill','Onehunga','Royal Oak','Three Kings',
+  // Auckland — Waitākere
+  'Avondale','Glen Eden','Glendene','Henderson','Kelston','Massey','New Lynn','Ranui','Swanson','Te Atatū North','Te Atatū Peninsula','Titirangi','Westgate','West Harbour','Whenuapai',
+  // Auckland — Manukau / South
+  'Airport Oaks','Botany Downs','Brookby','Bucklands Beach','Chapel Downs','Clendon Park','Clover Park','Dannemora','East Tamaki','Favona','Flat Bush','Golflands','Highland Park','Howick','Māngere','Māngere Bridge','Māngere East','Manurewa','Ōtara','Papatoetoe','Randwick Park','Shelly Park','Sunnyhills','The Gardens','Wattle Downs','Weymouth',
+  // Auckland — Eastern / Ōrākei
+  'Cockle Bay','Glen Innes','Glendowie','Half Moon Bay','Kohimarama','Meadowbank','Mission Bay','Pakuranga','Panmure','Point England','Remuera','Saint Heliers','Saint Johns','Tāmaki',
+  // Auckland — Rodney / North
+  'Dairy Flat','Helensville','Huapai','Kumeu','Orewa','Red Beach','Silverdale','Warkworth','Wellsford','Whangaparāoa',
+  // Auckland — Franklin / South
+  'Clarks Beach','Drury','Karaka','Papakura','Pukekohe','Ramarama','Takanini','Tuakau','Waiuku',
+  // Hamilton
+  'Beerescourt','Chartwell','Claudelands','Dinsdale','Enderley','Fairfield','Flagstaff','Frankton','Glenview','Hamilton CBD','Hamilton East','Hamilton Lake','Hillcrest','Nawton','Rototuna','St Andrews','Temple View','Whitiora',
+  // Tauranga / Bay of Plenty
+  'Arataki','Bethlehem','Gate Pa','Greerton','Hairini','Judea','Katikati','Matua','Mount Maunganui','Otumoetai','Papamoa','Pāpāmoa Beach','Pyes Pa','Te Puke','Welcome Bay','Whakatāne',
+  // Wellington
+  'Aro Valley','Berhampore','Broadmeadows','Brooklyn','Churton Park','Grenada North','Hataitai','Island Bay','Johnsonville','Karori','Kelburn','Khandallah','Kilbirnie','Miramar','Mornington','Mount Cook','Mount Victoria','Newlands','Newtown','Ngaio','Ngauranga','Northland','Oriental Bay','Ōwhiro Bay','Paparangi','Roseneath','Rongotai','Seatoun','Strathmore Park','Tawa','Te Aro','Thorndon','Vogeltown','Wadestown','Wellington CBD','Wilton','Woodridge',
+  // Lower Hutt
+  'Alicetown','Avalon','Boulcott','Epuni','Gracefield','Harbour View','Korokoro','Moera','Naenae','Normandale','Petone','Stokes Valley','Taita','Wainuiomata','Waterloo','Woburn',
+  // Upper Hutt
+  'Clouston Park','Elderslea','Heretaunga','Silverstream','Trentham','Upper Hutt CBD','Wallaceville',
+  // Porirua
+  'Aotea','Ascot Park','Cannons Creek','Elsdon','Linden','Mana','Papakowhai','Paremata','Plimmerton','Porirua CBD','Pukerua Bay','Tītahi Bay','Waitangirua',
+  // Christchurch
+  'Addington','Aranui','Avondale','Avonhead','Avonside','Beckenham','Belfast','Bishopdale','Bexley','Bromley','Bryndwr','Burnside','Burwood','Cashmere','Christchurch CBD','Dallington','Edgeware','Fendalton','Ferrymead','Halswell','Harewood','Heathcote Valley','Hornby','Hoon Hay','Ilam','Islington','Lyttelton','Linwood','Mairehau','Merivale','Mount Pleasant','New Brighton','Northwood','Ōpāwa','Papanui','Parklands','Phillipstown','Prebbleton','Riccarton','Rolleston','Shirley','Sockburn','South Brighton','Spreydon','St Albans','St Martins','Sumner','Sydenham','Upper Riccarton','Wainoni','Wigram','Woolston','Yaldhurst',
+  // Dunedin
+  'Andersons Bay','Balclutha','Belleknowes','Brockville','Caversham','Corstorphine','Forbury','Green Island','Halfway Bush','Kaikorai','Maori Hill','Mosgiel','Musselburgh','North East Valley','Ravensbourne','Roslyn','Saint Clair','Saint Kilda','South Dunedin','Tainui','Wakari',
+  // Palmerston North
+  'Aokautere','Ashhurst','Awapuni','Cloverlea','Hokowhitu','Kelvin Grove','Linton','Milson','Palmerston North CBD','Roslyn','Takaro','Terrace End',
+  // Napier / Hastings
+  'Ahuriri','Bay View','Bluff Hill','Clive','Greenmeadows','Havelock North','Hastings CBD','Mahora','Maraenui','Marewa','Napier CBD','Onekawa','Pirimai','Tamatea','Taradale','Te Awanga','Westshore',
+  // New Plymouth
+  'Bell Block','Brooklands','Fitzroy','Inglewood','Moturoa','New Plymouth CBD','Spotswood','Strandon','Vogeltown','Westown',
+  // Nelson / Tasman
+  'Atawhai','Birchwood','Enner Glynn','Motueka','Nelson CBD','Richmond','Stoke','Tahunanui','The Brook','The Wood','Wakefield',
+  // Rotorua
+  'Fenton Park','Fordlands','Glenholme','Hillcrest','Holdens Bay','Koutu','Lynmore','Ngongotahā','Rotorua CBD','Springfield','Tihiotonga',
+  // Whanganui
+  'Aramoho','Castlecliff','Gonville','Marybank','Otamatea','St Johns Hill','Whanganui CBD','Whanganui East',
+  // Invercargill
+  'Avenal','Clifton','Georgetown','Gladstone','Hawthorndale','Heidelberg','Invercargill CBD','Kennington','Kew','Moorfield','Newfield','Strathern','Waikiwi','Windsor',
+  // Queenstown / Lakes
+  'Arrowtown','Arthurs Point','Fernhill','Frankton','Gibbston','Glenorchy','Kelvin Heights','Lake Hayes','Queenstown CBD','Remarkables Park','Wānaka',
+  // Whangarei
+  'Abbey Caves','Avenues','Kamo','Maunu','Morningside','Otaika','Onerahi','Raumanga','Tikipunga','Whau Valley','Whangarei CBD','Woodhill',
+  // Gisborne
+  'Elgin','Kaiti','Lytton','Mangapapa','Tamarau','Whataupoko',
+  // Timaru
+  'Gleniti','Highfield','Marchwiel','Parklands','Timaru CBD','Washdyke',
+  // Other notable towns
+  'Blenheim','Feilding','Kāpiti','Levin','Masterton','Paraparaumu','Picton','Shannon',
+];
+
 // ══════════════════════════════════════════════════════════════════════════════
 // STATE
 // ══════════════════════════════════════════════════════════════════════════════
@@ -1142,6 +1204,29 @@ function ratingCard(r, plate) {
 // ══════════════════════════════════════════════════════════════════════════════
 // RATE FORM
 // ══════════════════════════════════════════════════════════════════════════════
+
+function suburbInput(input) {
+  const q = input.value.trim().toLowerCase();
+  const box = document.getElementById('suburb-suggestions');
+  if (q.length < 2) { box.classList.add('hidden'); return; }
+  const matches = NZ_SUBURBS.filter(s => s.toLowerCase().includes(q)).slice(0, 8);
+  if (!matches.length) { box.classList.add('hidden'); return; }
+  box.innerHTML = matches.map(s => `
+    <button type="button" onmousedown="selectSuburb('${s.replace(/'/g, "\\'")}')"
+      class="w-full text-left px-4 py-2.5 text-sm hover:bg-[#EBF7FA] hover:text-[#0D5F73] border-b border-[#F4F8FA] last:border-0 transition-colors focus-visible:outline-none focus-visible:bg-[#EBF7FA]">
+      ${s}
+    </button>`).join('');
+  box.classList.remove('hidden');
+}
+
+function selectSuburb(suburb) {
+  document.getElementById('rate-suburb').value = suburb;
+  closeSuburbDropdown();
+}
+
+function closeSuburbDropdown() {
+  document.getElementById('suburb-suggestions').classList.add('hidden');
+}
 
 function initRateForm(params = {}) {
   rateData = { plate: params.plate || '', photo: null };
