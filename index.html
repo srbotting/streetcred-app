@@ -384,6 +384,7 @@
       <button onclick="nav('home')"     class="px-4 py-2 text-sm font-medium text-[#4A6674] rounded-lg hover:bg-[#EBF7FA] hover:text-[#0D5F73] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-300">Search</button>
       <button onclick="nav('rate')"     class="px-4 py-2 text-sm font-medium text-[#4A6674] rounded-lg hover:bg-[#EBF7FA] hover:text-[#0D5F73] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-300">Rate a Plate</button>
       <button onclick="nav('register')" class="px-4 py-2 text-sm font-medium text-[#4A6674] rounded-lg hover:bg-[#EBF7FA] hover:text-[#0D5F73] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-300">Register Mine</button>
+      <button onclick="nav('feedback')" class="px-4 py-2 text-sm font-medium text-[#4A6674] rounded-lg hover:bg-[#EBF7FA] hover:text-[#0D5F73] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-300">Feedback</button>
       <button onclick="nav('rate')" class="btn-primary ml-2" style="padding:8px 18px;font-size:0.875rem">
         <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
         Submit Rating
@@ -402,6 +403,7 @@
       <button onclick="nav('home');toggleMenu()"     class="text-left px-4 py-3 text-sm font-medium text-[#4A6674] rounded-lg hover:bg-[#EBF7FA] hover:text-[#0D5F73] transition-colors">Search</button>
       <button onclick="nav('rate');toggleMenu()"     class="text-left px-4 py-3 text-sm font-medium text-[#4A6674] rounded-lg hover:bg-[#EBF7FA] hover:text-[#0D5F73] transition-colors">Rate a Plate</button>
       <button onclick="nav('register');toggleMenu()" class="text-left px-4 py-3 text-sm font-medium text-[#4A6674] rounded-lg hover:bg-[#EBF7FA] hover:text-[#0D5F73] transition-colors">Register Mine</button>
+      <button onclick="nav('feedback');toggleMenu()" class="text-left px-4 py-3 text-sm font-medium text-[#4A6674] rounded-lg hover:bg-[#EBF7FA] hover:text-[#0D5F73] transition-colors">Feedback</button>
     </div>
   </div>
 </nav>
@@ -745,6 +747,50 @@
     </div>
   </div>
 
+  <!-- ─── FEEDBACK ─── -->
+  <div id="view-feedback" class="view">
+    <div class="max-w-lg mx-auto px-4 py-10">
+      <h2 class="text-3xl font-display font-bold mb-2" style="letter-spacing:-0.03em">Share your feedback</h2>
+      <p class="text-[#4A6674] mb-8 text-sm">Got a suggestion, spotted a bug, or just want to say something? We'd love to hear it.</p>
+      <div class="card p-6 space-y-5">
+        <div>
+          <label class="label">Category</label>
+          <select id="fb-category" class="input">
+            <option value="general">General feedback</option>
+            <option value="suggestion">Feature suggestion</option>
+            <option value="bug">Bug report</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+        <div>
+          <label class="label">Your name <span class="text-xs font-normal text-[#4A6674]">(optional)</span></label>
+          <input id="fb-name" type="text" class="input" placeholder="Leave blank to stay anonymous" />
+        </div>
+        <div>
+          <label class="label">Message <span class="text-red-500">*</span></label>
+          <textarea id="fb-message" class="input" rows="5" placeholder="Tell us what's on your mind…" style="resize:vertical"></textarea>
+        </div>
+        <p id="fb-error" class="text-sm text-red-600 hidden"></p>
+        <div id="fb-success" class="hidden text-center py-4">
+          <div class="w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-3" style="background:#DCFCE7">
+            <svg width="28" height="28" fill="none" stroke="#0E7A3D" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <p class="font-semibold text-[#0E7A3D]">Thanks for your feedback!</p>
+          <p class="text-sm text-[#4A6674] mt-1">We read every submission.</p>
+        </div>
+        <button id="fb-btn" onclick="submitFeedback()" class="btn-primary w-full justify-center">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M22 2L11 13"/><path d="M22 2L15 22l-4-9-9-4 20-7z"/></svg>
+          Send feedback
+        </button>
+      </div>
+      <!-- Published feedback -->
+      <div id="published-feedback-section" class="mt-10 hidden">
+        <h3 class="text-sm font-bold uppercase tracking-widest text-[#4A6674] mb-4">What others are saying</h3>
+        <div id="published-feedback-list" class="space-y-3"></div>
+      </div>
+    </div>
+  </div>
+
   <!-- ─── MODERATOR ─── -->
   <div id="view-mod" class="view">
     <div class="max-w-4xl mx-auto px-4 py-10">
@@ -756,12 +802,28 @@
         <button onclick="modLogin()" class="btn-primary w-full justify-center">Log in</button>
         <p id="mod-auth-error" class="text-sm text-red-600 mt-3 hidden">Incorrect password.</p>
       </div>
-      <div id="mod-queue" class="hidden space-y-4">
-        <div class="flex items-center justify-between mb-2">
-          <p class="text-sm text-[#4A6674]">Open disputes requiring moderation</p>
-          <button onclick="loadModQueue()" class="text-sm text-[#0D5F73] hover:underline">Refresh</button>
+      <div id="mod-queue" class="hidden">
+        <!-- Tabs -->
+        <div class="flex gap-1 mb-6 border-b border-[#DDE6EB]">
+          <button id="mod-tab-disputes" onclick="modTab('disputes')" class="px-4 py-2 text-sm font-semibold text-[#0D5F73] border-b-2 border-[#0D5F73] -mb-px transition-colors">Disputes</button>
+          <button id="mod-tab-feedback" onclick="modTab('feedback')" class="px-4 py-2 text-sm font-medium text-[#4A6674] border-b-2 border-transparent -mb-px hover:text-[#0D5F73] transition-colors">Feedback</button>
         </div>
-        <div id="mod-disputes-list"></div>
+        <!-- Disputes panel -->
+        <div id="mod-panel-disputes" class="space-y-4">
+          <div class="flex items-center justify-between mb-2">
+            <p class="text-sm text-[#4A6674]">Open disputes requiring moderation</p>
+            <button onclick="loadModQueue()" class="text-sm text-[#0D5F73] hover:underline">Refresh</button>
+          </div>
+          <div id="mod-disputes-list"></div>
+        </div>
+        <!-- Feedback panel -->
+        <div id="mod-panel-feedback" class="hidden space-y-4">
+          <div class="flex items-center justify-between mb-2">
+            <p class="text-sm text-[#4A6674]">User feedback &amp; suggestions</p>
+            <button onclick="loadModFeedback()" class="text-sm text-[#0D5F73] hover:underline">Refresh</button>
+          </div>
+          <div id="mod-feedback-list"></div>
+        </div>
       </div>
     </div>
   </div>
@@ -846,6 +908,7 @@ function nav(view, params = {}) {
   if (view === 'rate') initRateForm(params);
   if (view === 'plate' && params.plate) loadPlateProfile(params.plate);
   if (view === 'dispute' && params.ratingId) loadDispute(params.ratingId, params.mode);
+  if (view === 'feedback') loadPublishedFeedback();
   if (view === 'mod') { /* stays as login screen */ }
 
   window.scrollTo({ top:0, behavior:'smooth' });
@@ -1380,9 +1443,54 @@ async function modLogin() {
   }
 }
 
+function modTab(tab) {
+  document.getElementById('mod-panel-disputes').classList.toggle('hidden', tab !== 'disputes');
+  document.getElementById('mod-panel-feedback').classList.toggle('hidden', tab !== 'feedback');
+  document.getElementById('mod-tab-disputes').className = `px-4 py-2 text-sm font-${tab==='disputes'?'semibold text-[#0D5F73] border-b-2 border-[#0D5F73]':'medium text-[#4A6674] border-b-2 border-transparent hover:text-[#0D5F73]'} -mb-px transition-colors`;
+  document.getElementById('mod-tab-feedback').className  = `px-4 py-2 text-sm font-${tab==='feedback'?'semibold text-[#0D5F73] border-b-2 border-[#0D5F73]':'medium text-[#4A6674] border-b-2 border-transparent hover:text-[#0D5F73]'} -mb-px transition-colors`;
+  if (tab === 'feedback') loadModFeedback();
+}
+
 async function loadModQueue() {
   const data = await api('/api/mod/disputes', { headers:{ Authorization:`Bearer ${modToken}` } });
   renderModQueue(data);
+}
+
+async function loadModFeedback() {
+  const el = document.getElementById('mod-feedback-list');
+  try {
+    const data = await api('/api/mod/feedback', { headers:{ Authorization:`Bearer ${modToken}` } });
+    if (!data.length) { el.innerHTML = '<div class="text-[#4A6674] text-sm py-6 text-center">No feedback yet.</div>'; return; }
+    const catColors = { suggestion:'bg-blue-100 text-blue-800', bug:'bg-red-100 text-red-800', general:'bg-[#EBF7FA] text-[#0D5F73]', other:'bg-gray-100 text-gray-700' };
+    el.innerHTML = data.map(f => `
+      <div class="card p-5 space-y-2" id="fb-card-${f.id}">
+        <div class="flex items-center gap-3 flex-wrap">
+          <span class="text-sm font-semibold">${f.name || 'Anonymous'}</span>
+          <span class="text-xs px-2 py-0.5 rounded-full ${catColors[f.category]||catColors.other}">${f.category}</span>
+          <span class="text-xs text-[#9BBFC8]">${timeAgo(f.created_at)}</span>
+          <button onclick="togglePublish(${f.id}, this)" class="ml-auto text-xs px-3 py-1 rounded-full border-2 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-300 ${f.published ? 'border-[#0E7A3D] bg-[#DCFCE7] text-[#0E7A3D]' : 'border-[#DDE6EB] text-[#4A6674] hover:border-[#0E7A3D] hover:text-[#0E7A3D]'}" data-published="${f.published}">
+            ${f.published ? '✓ Showing publicly' : 'Show publicly'}
+          </button>
+        </div>
+        <p class="text-sm text-[#0D1F2D] bg-[#F4F8FA] rounded-xl p-3">${f.message}</p>
+      </div>`).join('');
+  } catch(e) {
+    el.innerHTML = '<div class="text-red-500 text-sm py-6 text-center">Could not load feedback.</div>';
+  }
+}
+
+async function togglePublish(id, btn) {
+  try {
+    const res = await api(`/api/mod/feedback/${id}/publish`, {
+      method: 'PUT',
+      headers: { Authorization: `Bearer ${modToken}` },
+    });
+    btn.dataset.published = res.published ? '1' : '0';
+    btn.textContent = res.published ? '✓ Showing publicly' : 'Show publicly';
+    btn.className = `ml-auto text-xs px-3 py-1 rounded-full border-2 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-300 ${res.published ? 'border-[#0E7A3D] bg-[#DCFCE7] text-[#0E7A3D]' : 'border-[#DDE6EB] text-[#4A6674] hover:border-[#0E7A3D] hover:text-[#0E7A3D]'}`;
+  } catch(e) {
+    toast('Could not update — please try again.');
+  }
 }
 
 function renderModQueue(data) {
@@ -1430,6 +1538,62 @@ async function modDecide(disputeId, decision) {
     loadModQueue();
   } catch(e) {
     toast('Error saving decision.');
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// FEEDBACK
+// ══════════════════════════════════════════════════════════════════════════════
+
+async function loadPublishedFeedback() {
+  const section = document.getElementById('published-feedback-section');
+  const el = document.getElementById('published-feedback-list');
+  try {
+    const data = await api('/api/feedback');
+    if (!data.length) { section.classList.add('hidden'); return; }
+    const catColors = { suggestion:'bg-blue-100 text-blue-800', bug:'bg-red-100 text-red-800', general:'bg-[#EBF7FA] text-[#0D5F73]', other:'bg-gray-100 text-gray-700' };
+    el.innerHTML = data.map(f => `
+      <div class="card p-4 space-y-1.5">
+        <div class="flex items-center gap-2 flex-wrap">
+          <span class="text-sm font-semibold">${f.name || 'Anonymous'}</span>
+          <span class="text-xs px-2 py-0.5 rounded-full ${catColors[f.category]||catColors.other}">${f.category}</span>
+          <span class="text-xs text-[#9BBFC8] ml-auto">${timeAgo(f.created_at)}</span>
+        </div>
+        <p class="text-sm text-[#0D1F2D]">${f.message}</p>
+      </div>`).join('');
+    section.classList.remove('hidden');
+  } catch(e) {
+    section.classList.add('hidden');
+  }
+}
+
+async function submitFeedback() {
+  const message = document.getElementById('fb-message').value.trim();
+  const errEl   = document.getElementById('fb-error');
+  errEl.classList.add('hidden');
+  if (!message) { errEl.textContent = 'Please enter a message.'; errEl.classList.remove('hidden'); return; }
+
+  const btn = document.getElementById('fb-btn');
+  btn.disabled = true; btn.textContent = 'Sending…';
+
+  try {
+    await api('/api/feedback', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name: document.getElementById('fb-name').value.trim() || null,
+        category: document.getElementById('fb-category').value,
+        message,
+      }),
+    });
+    document.getElementById('fb-success').classList.remove('hidden');
+    btn.classList.add('hidden');
+    document.getElementById('fb-message').value = '';
+    document.getElementById('fb-name').value = '';
+  } catch(e) {
+    errEl.textContent = 'Something went wrong — please try again.';
+    errEl.classList.remove('hidden');
+    btn.disabled = false; btn.textContent = 'Send feedback';
   }
 }
 

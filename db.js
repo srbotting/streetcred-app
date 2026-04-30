@@ -65,6 +65,19 @@ export async function initDb() {
     )
   `);
 
+  db.run(`
+    CREATE TABLE IF NOT EXISTS feedback (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT,
+      category TEXT DEFAULT 'general',
+      message TEXT NOT NULL,
+      published INTEGER DEFAULT 0,
+      created_at INTEGER DEFAULT (strftime('%s','now'))
+    )
+  `);
+
+  try { db.run(`ALTER TABLE feedback ADD COLUMN published INTEGER DEFAULT 0`); } catch(e) { /* column already exists */ }
+
   save();
 }
 
@@ -322,4 +335,24 @@ export function searchPlates(query) {
     ORDER BY rating_count DESC
     LIMIT 10
   `, [`${query}%`]);
+}
+
+export function submitFeedback({ name, category, message }) {
+  run(`INSERT INTO feedback (name, category, message) VALUES (?, ?, ?)`,
+    [name || null, category || 'general', message]);
+  return { success: true, feedbackId: lastId() };
+}
+
+export function getFeedback() {
+  return all(`SELECT * FROM feedback ORDER BY created_at DESC`);
+}
+
+export function toggleFeedbackPublished(id) {
+  run(`UPDATE feedback SET published = CASE WHEN published = 1 THEN 0 ELSE 1 END WHERE id = ?`, [id]);
+  const row = get(`SELECT published FROM feedback WHERE id = ?`, [id]);
+  return { success: true, published: row?.published === 1 };
+}
+
+export function getPublishedFeedback() {
+  return all(`SELECT id, name, category, message, created_at FROM feedback WHERE published = 1 ORDER BY created_at DESC`);
 }

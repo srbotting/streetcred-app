@@ -130,6 +130,34 @@ app.put('/api/mod/disputes/:id', requireMod, (req, res) => {
   }
 });
 
+// ── Feedback ──────────────────────────────────────────────────────────────────
+
+app.post('/api/feedback', (req, res) => {
+  try {
+    const { name, category, message } = req.body;
+    if (!message || !message.trim()) return res.status(400).json({ error: 'message is required' });
+    res.json(db.submitFeedback({ name: name?.trim() || null, category: category || 'general', message: message.trim() }));
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+app.get('/api/mod/feedback', requireMod, (req, res) => {
+  res.json(db.getFeedback());
+});
+
+app.put('/api/mod/feedback/:id/publish', requireMod, (req, res) => {
+  try {
+    res.json(db.toggleFeedbackPublished(parseInt(req.params.id, 10)));
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+app.get('/api/feedback', (req, res) => {
+  res.json(db.getPublishedFeedback());
+});
+
 // ── Feed & Search ─────────────────────────────────────────────────────────────
 
 app.get('/api/feed', (req, res) => res.json(db.getRecentFeed()));
