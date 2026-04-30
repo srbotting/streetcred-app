@@ -970,7 +970,7 @@ function nav(view, params = {}) {
   if (view === 'rate') initRateForm(params);
   if (view === 'plate' && params.plate) loadPlateProfile(params.plate);
   if (view === 'dispute' && params.ratingId) loadDispute(params.ratingId, params.mode);
-  if (view === 'feedback') loadPublishedFeedback();
+  if (view === 'feedback') { resetFeedbackForm(); loadPublishedFeedback(); }
   if (view === 'mod') { /* stays as login screen */ }
 
   window.scrollTo({ top:0, behavior:'smooth' });
@@ -1629,6 +1629,18 @@ async function modDecide(disputeId, decision) {
 // ══════════════════════════════════════════════════════════════════════════════
 // FEEDBACK
 // ══════════════════════════════════════════════════════════════════════════════
+
+function resetFeedbackForm() {
+  document.getElementById('fb-message').value = '';
+  document.getElementById('fb-name').value = '';
+  document.getElementById('fb-category').value = 'general';
+  document.getElementById('fb-error').classList.add('hidden');
+  document.getElementById('fb-success').classList.add('hidden');
+  const btn = document.getElementById('fb-btn');
+  btn.classList.remove('hidden');
+  btn.disabled = false;
+  btn.textContent = 'Send feedback';
+}
 
 async function loadPublishedFeedback() {
   const section = document.getElementById('published-feedback-section');
