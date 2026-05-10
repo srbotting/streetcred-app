@@ -155,8 +155,20 @@ app.put('/api/mod/feedback/:id/publish', requireMod, (req, res) => {
   }
 });
 
+app.put('/api/mod/feedback/:id/done', requireMod, (req, res) => {
+  try {
+    res.json(db.markFeedbackDone(parseInt(req.params.id, 10)));
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 app.get('/api/feedback', (req, res) => {
   res.json(db.getPublishedFeedback());
+});
+
+app.get('/api/changelog', (req, res) => {
+  res.json(db.getChangelog());
 });
 
 // ── Feed & Search ─────────────────────────────────────────────────────────────

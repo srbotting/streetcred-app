@@ -76,7 +76,9 @@ export async function initDb() {
     )
   `);
 
-  try { db.run(`ALTER TABLE feedback ADD COLUMN published INTEGER DEFAULT 0`); } catch(e) { /* column already exists */ }
+  try { db.run(`ALTER TABLE feedback ADD COLUMN published INTEGER DEFAULT 0`); } catch(e) { /* already exists */ }
+  try { db.run(`ALTER TABLE feedback ADD COLUMN status TEXT DEFAULT 'pending'`); } catch(e) { /* already exists */ }
+  try { db.run(`ALTER TABLE feedback ADD COLUMN resolved_at INTEGER`); } catch(e) { /* already exists */ }
 
   save();
 }
@@ -344,7 +346,24 @@ export function submitFeedback({ name, category, message }) {
 }
 
 export function getFeedback() {
-  return all(`SELECT * FROM feedback ORDER BY created_at DESC`);
+  return all(`SELECT * FROM feedback WHERE status = 'pending' OR status IS NULL ORDER BY created_at DESC`);
+}
+
+export function markFeedbackDone(id) {
+  const row = get(`SELECT category FROM feedback WHERE id = ?`, [id]);
+  if (!row) throw new Error('Feedback not found');
+  const status = row.category === 'bug' ? 'fixed' : 'done';
+  run(`UPDATE feedback SET status = ?, resolved_at = strftime('%s','now') WHERE id = ?`, [status, id]);
+  return { success: true, status };
+}
+
+export function getChangelog() {
+  return all(`
+    SELECT id, name, category, message, status, resolved_at, created_at
+    FROM feedback
+    WHERE status IN ('done', 'fixed')
+    ORDER BY resolved_at DESC
+  `);
 }
 
 export function toggleFeedbackPublished(id) {
