@@ -860,7 +860,7 @@
   <div class="max-w-6xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-[#4A6674]">
     <span class="font-display font-bold" style="color:#0D5F73; letter-spacing:-0.02em">Street<span style="color:#D97706">Cred</span></span>
     <span>NZ's road reputation platform &mdash; please rate responsibly.</span>
-    <button onclick="nav('mod')" class="hover:text-[#0D5F73] transition-colors">Moderator</button>
+    <span>&copy; 2025 StreetCred NZ</span>
   </div>
 </footer>
 
@@ -1813,7 +1813,11 @@ function timeAgo(ts) {
 // BOOT
 // ══════════════════════════════════════════════════════════════════════════════
 
-nav('home');
+if (window.location.pathname === '/moderator') {
+  nav('mod');
+} else {
+  nav('home');
+}
 </script>
 
 </body>
